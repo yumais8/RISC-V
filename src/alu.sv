@@ -46,8 +46,8 @@ always_comb begin
                 3'h2: rs_out = (rs1 < $signed(SHAMT12 & rs2)) 1 : 0;
                 3'h3: rs_out = (rs1 < $unsigned(SHAMT12 & rs2)) 1 : 0;
             endcase
-        7'b0000011: rs_out = rs1 + rs2; // adding rs1 with whatever extended imm, and send address to memory to load
-        7'b0100011: rs_out = rs1 + rs2; // adding rs1 with whatever extended imm, and send address to memory to store
+        7'b0000011: rs_out = rs1 + rs2; // Load: adding rs1 with whatever extended imm, and send address to memory to load
+        7'b0100011: rs_out = rs1 + rs2; // Store: adding rs1 with whatever extended imm, and send address to memory to store
         7'b1100011: rs_out = rs1 + rs2; // PC + imm (last bit is always 0)
         7'b1101111: rs_out = rs1 + rs2; // JAL
         7'b1100111: rs_out = (rs1 + rs2) & ~1; // JALr
