@@ -14,9 +14,6 @@ module control
     output logic reg_write,
     output logic [4:0] rd
 );
-//////////////////////////////
-// Need a re-design of the write back stage
-//////////////////////////////
 
 logic[4:0] destination_reg;
 
