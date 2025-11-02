@@ -17,6 +17,7 @@ always_comb begin
         3'h6: comp_out = $unsigned(rs1) < $unsigned(rs2) ? true : false;
         3'h7: comp_out = $unsigned(rs1) >= $unsigned(rs2) ? true: false;
         default: comp_out = false;
+        // Need some kind of flush signal for instructions exist in the pipeline
     endcase
 end
 
