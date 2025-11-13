@@ -51,8 +51,8 @@ always_comb begin
         7'b1100011: rs_out = rs1 + rs2; // PC + imm (last bit is always 0)
         7'b1101111: rs_out = rs1 + rs2; // JAL
         7'b1100111: rs_out = (rs1 + rs2) & ~1; // JALr
-        7'b0110111: rs_out = ($signed(rs2) << 12); // LUI
-        7'b0010111: rs_out = rs1 + ($signed(rs2) << 12); // auipc
+        7'b0110111: rs_out = $signed(rs2 << 12); // LUI
+        7'b0010111: rs_out = rs1 + signed(rs2 << 12); // auipc
         default: rs_out = {16{1'b1, 1'b0}}; // Debugging purpose
     endcase
 end
