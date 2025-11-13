@@ -1,7 +1,7 @@
 module sext(
     input logic[31:0] instruction,
     output logic[31:0] immediate_o
-)
+);
 
     // Test to see if it's better to manually inline (or is this good style?)
     logic [6:0] opcode = instruction[6:0];
@@ -31,7 +31,7 @@ module sext(
                 immediate_o = {12{instruction[31]}, {instruction[31], instruction[19:12], instruction[20], instruction[30:21],1'b0}};
             7'b0110111, 7'b0010111: // U-type LUI and U-type AUIPC "Don't care", 0-extend
                 immediate_o = {12{1'b0}, instruction[31:12]};
-            default: immediate_o 32{1'b0}; // Tell compiler that this case is truly unique
+            default: immediate_o = 32{1'b0}; // Tell compiler that this case is truly unique
         endcase
     end
 endmodule
