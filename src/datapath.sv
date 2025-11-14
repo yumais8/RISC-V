@@ -3,6 +3,20 @@ module datapath(
     input logic reset
 );
 
+logic [31:0] pc;
+
+pc pc(
+    .clk(clk),
+    .reset(reset),
+    .pc(pc),
+    .next_pc()
+);
+
+
+controll controll(
+
+);
+
 regFile register(
     .rs1(),
     .rs2(),
@@ -14,7 +28,6 @@ regFile register(
     .rs1_out(),
     .rs2_out()
 );
-
 
 
 endmodule
