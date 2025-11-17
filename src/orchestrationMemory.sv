@@ -1,4 +1,7 @@
-module instructionMemory(
+module orchestrationMemory #(
+    parameter string FILE = ""
+)
+(
     input logic [31:0] address,
     output logic [31:0] instruction
 );
@@ -7,10 +10,10 @@ assign instr_addr = address[7:0];
 
 logic [31:0] instruction_mem [255:0];
 
-// potentialy, install all instructions here
-// initial begin
-//
-// end
+initial begin
+    $display("Loading instruction memory");
+    if (FILE != "") $readmemh(FILE, instruction_mem);
+end
 
 always begin
     instruction = instruction_mem[instr_addr];
