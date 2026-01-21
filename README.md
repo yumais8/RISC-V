@@ -1,10 +1,11 @@
 # RISC-V
-A CPU built based on RISC-V with SystemVerilog
+A CPU built based on RISC-V architecture
 
 ## Some useful reference similar CPU projects github link:
 - This person is called [Nathalia](https://github.com/estufa-cin-ufpe/RISC-V-Pipeline/tree/master)? maybe..
 - This person is called .. idk [github link](https://github.com/yifax/RISC-V-PipeLine/tree/master)
 - [Risc-V Docs](https://msyksphinz-self.github.io/riscv-isadoc/)
 
-## My ECE Computer Architecture PPTs
-- I will share with you personally ~~
+## Assembler
+- [UCDavis js assembler](https://luplab.cs.ucdavis.edu/2022/06/03/rvcodec-js.html?utm_source=chatgpt.com)
+- Python [riscv-assembler](https://github.com/celebi-pkg/riscv-assembler) --> the one I use
