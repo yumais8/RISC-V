@@ -3,15 +3,14 @@ module pc(
     input logic reset,
     input logic [31:0] pc,
     
-    output logic [31:0] next_pc
+    output logic [31:0] pc_next
 );
 
-
-always_ff (@posedge clk) begin
+always_ff @(posedge clk) begin
     if (reset) begin
-        next_pc = '{default, 32'b0};
+        pc_next <= 32'h00;
     end else begin
-        next_pc = pc + 32'h4;
+        pc_next <= pc;
     end
 end
 

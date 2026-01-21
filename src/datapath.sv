@@ -4,58 +4,50 @@ module datapath #(
 )
 (
     input logic clk,
-    input logic reset
+    input logic reset,
+
+    output logic [31:0] pc_id,
+    output logic [31:0] instruction_id
 );
 
+logic [31:0] pc_mux_out;
 logic [31:0] pc;
-logic [31:0] next_pc;
+logic [31:0] pcplus4;
 logic [31:0] instruction;
 
-pc pc(
+pc programCounter(
     .clk(clk),
     .reset(reset),
-    .pc(pc),
-    .next_pc(next_pc)
+    .pc(pc_mux_out),
+    .pc_next(pc)
 );
 
-orchestrationMemory pcInstructionMem #(
+pcAdder pc_adder(
+    .pc(pc),
+    .next_pc(pcplus4)
+);
+
+orchestrationMemory #(
     .FILE(INSTRUCTION_FILE)
-) imem (
-    .address(next_pc),
+) pcInstructionMem (
+    .address(pc),
     .instruction(instruction)
 );
 
-control control(
-    .instruction(),
-    .opcodes(),
-    .funct3(),
-    .funct7(),
-    .rs1_sel(),
-    .rs2_sel(),
-    .write_mem(),
-    .wb_sel(),
-    .reg_write(),
-    .rd()
-);
-
 mux2 pc_mux(
-    .data1(),
-    .data2(),
-    .select(),
-    .out_data()
+    .data1(pcplus4),
+    .data2(32'h0),
+    .select(1'b0),
+    .out_data(pc_mux_out)
 );
 
-regFile register(
-    .rs1(),
-    .rs2(),
-    .rd(),
-    .data_write(),
-    .reg_write(),
-    .clk(),
-    .reset(),
-    .rs1_out(),
-    .rs2_out()
+IFID ifid(
+    .reset(reset),
+    .clk(clk),
+    .pc(pc),
+    .instruction(instruction),
+    .pc_next(pc_id),
+    .instruction_next(instruction_id)
 );
-
 
 endmodule

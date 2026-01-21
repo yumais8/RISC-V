@@ -4,7 +4,7 @@ module pcAdder(
 );
 
 always_comb begin
-    next_pc = pc + 4;
+    next_pc = pc + 32'h4;
 end
 
 endmodule
