@@ -2,6 +2,7 @@ module IDEX
 (
     input logic clk,
     input logic reset,
+
     input logic [31:0] pc,
     input logic [6:0] funct7,
     input logic [2:0] funct3,
@@ -21,7 +22,7 @@ module IDEX
     output logic [2:0] funct3_next,
     output logic write_mem_next,
     output logic [6:0] opcodes_next,
-    output logoc [4:0] rd_next,
+    output logic [4:0] rd_next,
     output logic [1:0] wb_sel_next,
     output logic [1:0] rs1_sel_next,
     output logic [1:0] rs2_sel_next,
@@ -32,36 +33,36 @@ module IDEX
 );
 
 initial begin
-    pc_next = '{default: '0};
-    funct7_next = '{default: '0};
-    funct3_next = '{default: '0};
-    write_mem_next = '{default: '0};
-    opcodes_next = '{default: '0};
-    rd_next = '{default: '0};
-    wb_sel_next = '{default: '0};
-    rs1_sel_next = '{default: '0};
-    rs2_sel_next = '{default: '0};
-    reg_write_next = '{default: '0};
-    rs1_out_next = '{default: '0};
-    rs2_out_next = '{default: '0};
-    sext_out_next = '{default: '0};
+    pc_next = '0;
+    funct7_next = '0;
+    funct3_next = '0;
+    write_mem_next = '0;
+    opcodes_next = '0;
+    rd_next = '0;
+    wb_sel_next = '0;
+    rs1_sel_next = '0;
+    rs2_sel_next = '0;
+    reg_write_next = '0;
+    rs1_out_next = '0;
+    rs2_out_next = '0;
+    sext_out_next = '0;
 end
 
 always_ff @(posedge clk) begin
     if (reset) begin
-        pc_next <= '{default: '0};
-        funct7_next <= '{default: '0};
-        funct3_next <= '{default: '0};
-        write_mem_next <= '{default: '0};
-        opcodes_next <= '{default: '0};
-        rd_next <= '{default: '0};
-        wb_sel_next <= '{default: '0};
-        rs1_sel_next <= '{default: '0};
-        rs2_sel_next <= '{default: '0};
-        reg_write_next <= '{default: '0};
-        rs1_out_next <= '{default: '0};
-        rs2_out_next <= '{default: '0};
-        sext_out_next <= '{default: '0};
+        pc_next <= '0;
+        funct7_next <= '0;
+        funct3_next <= '0;
+        write_mem_next <= '0;
+        opcodes_next <= '0;
+        rd_next <= '0;
+        wb_sel_next <= '0;
+        rs1_sel_next <= '0;
+        rs2_sel_next <= '0;
+        reg_write_next <= '0;
+        rs1_out_next <= '0;
+        rs2_out_next <= '0;
+        sext_out_next <= '0;
     end else begin
         pc_next <= pc;
         funct7_next <= funct7;

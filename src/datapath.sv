@@ -6,12 +6,28 @@ module datapath #(
     input logic clk,
     input logic reset,
 
+    output logic [31:0] pc_ex,
+    output logic [6:0] funct7_ex,
+    output logic [2:0] funct3_ex,
+    output logic write_mem_ex,
+    output logic [6:0] opcodes_ex,
+    output logic [4:0] rd_ex,
+    output logic [1:0] wb_sel_ex,
+    output logic [1:0] rs1_sel_ex,
+    output logic [1:0] rs2_sel_ex,
+    output logic reg_write_ex,
+    output logic [31:0] rs1_out_ex,
+    output logic [31:0] rs2_out_ex,
+    output logic [31:0] sext_out_ex,
+
+    // For debugging purpose
+    output logic [31:0] pc,
     output logic [31:0] pc_id,
     output logic [31:0] instruction_id
 );
 
 logic [31:0] pc_mux_out;
-logic [31:0] pc;
+// logic [31:0] pc;
 logic [31:0] pcplus4;
 logic [31:0] instruction;
 
@@ -41,7 +57,40 @@ mux2 pc_mux(
     .out_data(pc_mux_out)
 );
 
-IFID ifid(
+// logic [31:0] pc_id;
+// logic [31:0] instruction_id;
+logic [6:0] opcodes;
+logic [2:0] funct3;
+logic [6:0] funct7;
+logic [1:0] rs1_sel;
+logic [1:0] rs2_sel;
+logic write_mem;
+logic [1:0]wb_sel;
+logic reg_write;
+logic [4:0] rd;
+
+logic [4:0] rs1 = instruction[19:15];
+logic [4:0] rs2 = instruction[24:20];
+logic [31:0] rs1_out;
+logic [31:0] rs2_out;
+
+logic [31:0] immediate_out;
+
+// logic [31:0] pc_ex;
+// logic [6:0] funct7_ex;
+// logic [2:0] funct3_ex;
+// logic write_mem_ex;
+// logic [6:0] opcodes_ex;
+// logic [4:0] rd_ex;
+// logic [1:0] wb_sel_ex;
+// logic [1:0] rs1_sel_ex;
+// logic [1:0] rs2_sel_ex;
+// logic reg_write_ex;
+// logic [31:0] rs1_out_ex;
+// logic [31:0] rs2_out_ex;
+// logic [31:0] sext_out_ex;
+
+IFID ifid_stage(
     .reset(reset),
     .clk(clk),
     .pc(pc),
@@ -49,5 +98,68 @@ IFID ifid(
     .pc_next(pc_id),
     .instruction_next(instruction_id)
 );
+
+// Decode stage
+control controller(
+    .instruction(instruction_id),
+    .opcodes(opcodes),
+    .funct3(funct3),
+    .funct7(funct7),
+    .rs1_sel(rs1_sel),
+    .rs2_sel(rs2_sel),
+    .write_mem(write_mem),
+    .wb_sel(wb_sel),
+    .reg_write(reg_write),
+    .rd(rd)
+);
+
+regFile registerFile(
+    .rs1(rs1),
+    .rs2(rs2),
+    .rd(5'h0),
+    .data_write(32'h00),
+    .reg_write(1'b0),
+    .clk(clk),
+    .reset(reset),
+    .rs1_out(rs1_out),
+    .rs2_out(rs2_out)
+);
+
+sext sign_extension(
+    .instruction(instruction_id),
+    .immediate_o(immediate_out)
+);
+
+IDEX idex_stage(
+    .clk(clk),
+    .reset(reset),
+    .pc(pc_id),
+    .funct7(funct7),
+    .funct3(funct3),
+    .write_mem(write_mem),
+    .opcodes(opcodes),
+    .rd(rd),
+    .wb_sel(wb_sel),
+    .rs1_sel(rs1_sel),
+    .rs2_sel(rs2_sel),
+    .reg_write(reg_write),
+    .rs1_out(rs1_out),
+    .rs2_out(rs2_out),
+    .sext_out(immediate_out),
+    .pc_next(pc_ex),
+    .funct7_next(funct7_ex),
+    .funct3_next(funct3_ex),
+    .write_mem_next(write_mem_ex),
+    .opcodes_next(opcodes_ex),
+    .rd_next(rd_ex),
+    .wb_sel_next(wb_sel_ex),
+    .rs1_sel_next(rs1_sel_ex),
+    .rs2_sel_next(rs2_sel_ex),
+    .reg_write_next(reg_write_ex),
+    .rs1_out_next(rs1_out_ex),
+    .rs2_out_next(rs2_out_ex),
+    .sext_out_next(sext_out_ex)
+);
+
 
 endmodule

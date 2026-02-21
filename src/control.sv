@@ -37,7 +37,7 @@ always_comb begin
                 rs1_sel = 2'b01;
                 rs2_sel = 2'b01;    // immediate
                 write_mem = 1'b0;
-                wb_sel = 1'b1;
+                wb_sel = 2'b01;
                 reg_write = 1'b1;
                 rd = destination_reg;
             end
