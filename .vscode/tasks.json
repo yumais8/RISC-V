@@ -1,0 +1,36 @@
+{
+    "version": "1.0.0",
+    "tasks": [
+        {
+            "label": "Build with Verilator",
+            "type": "shell",
+            "command": "verilator",
+            "args": [
+                "--cc",
+                "tb/tb.sv",
+                "src/datapath.sv",
+                "src/pc.sv",
+                "src/orchestrationMemory.sv",
+                "src/mux2.sv",
+                "src/IFID.sv",
+                "tb/tb.cpp",
+                "src/pcAdder.sv",
+                "src/sext.sv",
+                "src/regFile.sv",
+                "src/IDEX.sv",
+                "src/control.sv",
+                "src/alu.sv",
+                "src/mux4.sv",
+                "src/EXMEM.sv",
+                "src/branchComp.sv",
+                "src/memory.sv",
+                "--exe",
+                "--build",
+                "--trace",
+                "--timing",
+                "&&",
+                "./obj_dir/Vtb"
+            ]
+        }
+    ]
+}

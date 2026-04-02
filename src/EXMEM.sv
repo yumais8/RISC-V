@@ -1,6 +1,6 @@
 module EXMEM (
     input logic clk,
-    input logoc reset,
+    input logic reset,
     input logic [31:0] pcplus4,
     input logic [2:0] funct3,
     input logic write_mem,
@@ -9,7 +9,7 @@ module EXMEM (
     input logic [1:0] wb_sel,
     input logic reg_write,
     input logic [31:0] alu_out,
-    input logic [31:0] cmp_out,
+    input logic cmp_out,
     input logic [31:0] sext_out,
 
     output logic [31:0] pcplus4_next,
@@ -20,7 +20,7 @@ module EXMEM (
     output logic [1:0] wb_sel_next,
     output logic reg_write_next,
     output logic [31:0] alu_out_next,
-    output logic [31:0] cmp_out_next,
+    output logic cmp_out_next,
     output logic [31:0] sext_out_next
 );
 
