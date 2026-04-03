@@ -25,30 +25,30 @@ module EXMEM (
 );
 
 initial begin
-    pcplus4_next = '{default: '0};
-    funct3_next = '{default: '0};
-    write_mem_next = '{default: '0};
-    opcodes_next = '{default: '0};
-    rd_next = '{default: '0};
-    wb_sel_next = '{default: '0};
-    reg_write_next = '{default: '0};
-    alu_out_next = '{default: '0};
-    cmp_out_next = '{default: '0};
-    sext_out_next = '{default: '0};
+    pcplus4_next = '0;
+    funct3_next = '0;
+    write_mem_next = '0;
+    opcodes_next = '0;
+    rd_next = '0;
+    wb_sel_next = '0;
+    reg_write_next = '0;
+    alu_out_next = '0;
+    cmp_out_next = '0;
+    sext_out_next = '0;
 end
 
 always_ff @(posedge clk) begin
     if (reset) begin
-        pcplus4_next <= '{default: '0};
-        funct3_next <= '{default: '0};
-        write_mem_next <= '{default: '0};
-        opcodes_next <= '{default: '0};
-        rd_next <= '{default: '0};
-        wb_sel_next <= '{default: '0};
-        reg_write_next <= '{default: '0};
-        alu_out_next <= '{default: '0};
-        cmp_out_next <= '{default: '0};
-        sext_out_next <= '{default: '0};
+        pcplus4_next <= '0;
+        funct3_next <= '0;
+        write_mem_next <= '0;
+        opcodes_next <= '0;
+        rd_next <= '0;
+        wb_sel_next <= '0;
+        reg_write_next <= '0;
+        alu_out_next <= '0;
+        cmp_out_next <= '0;
+        sext_out_next <= '0;
     end else begin
         pcplus4_next <= pcplus4;
         funct3_next <= funct3;

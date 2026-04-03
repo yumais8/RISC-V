@@ -78,6 +78,7 @@ always_ff @(posedge clk) begin
                 endcase
             end
             3'h2: memory[word_addr] <= write_data; // SW
+            default: memory[word_addr] <= write_data;
         endcase
     end
 end

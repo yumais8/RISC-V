@@ -7,8 +7,8 @@ module alu(
     output logic [31:0] rs_out
 );
 
-localparam SHAMT5 = {5{1'b1}};
-localparam SHAMT12 = {12{1'b1}};
+localparam SHAMT5 = 32'h00000005;// {5{1'b1}};
+localparam [31:0] SHAMT12 = 32'h00000FFF;
 
 always_comb begin
     case (opcodes)
@@ -19,6 +19,7 @@ always_comb begin
                     case (funct7)
                         7'h00: rs_out = rs1 + rs2; // add
                         7'h20: rs_out = rs1 - rs2; // sub
+                        default: rs_out = 32'hxxxxxxxx;
                     endcase
                 end
                 3'h4: rs_out = rs1 ^ rs2; // xor
@@ -30,6 +31,7 @@ always_comb begin
                     case (funct7)
                         7'h00: rs_out = rs1 >>> rs2; // logical shift right
                         7'h20: rs_out = $signed(rs1) >> rs2;   // arithmetic shift right
+                        default: rs_out = 32'hxxxxxxxx;
                     endcase
                 end
                 3'h2: rs_out = ($signed(rs1) < $signed(rs2)) ? 1:0; // interpreted as 2's complement before comparing
@@ -49,6 +51,7 @@ always_comb begin
                     case (funct7)
                         7'h00: rs_out = rs1 >> (SHAMT5 & rs2);  // logical shift right
                         7'h20: rs_out = $signed(rs1) >> (SHAMT5 & rs2); // arithmetic shift right
+                        default: rs_out = 32'hxxxxxxxx;
                     endcase
                 end
                 3'h2: rs_out = (rs1 < $signed(SHAMT12 & rs2)) ? 1 : 0;
