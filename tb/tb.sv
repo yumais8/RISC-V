@@ -1,52 +1,24 @@
 `timescale 1ns/1ps
 
 module tb;
-    // DUT interface
     logic clk;
     logic reset;
-    logic [31:0] pc_ex;
-    logic [6:0] funct7_ex;
-    logic [2:0] funct3_ex;
-    logic write_mem_ex;
-    logic [6:0] opcodes_ex;
-    logic [4:0] rd_ex;
-    logic [1:0] wb_sel_ex;
-    logic [1:0] rs1_sel_ex;
-    logic [1:0] rs2_sel_ex;
-    logic reg_write_ex;
-    logic [31:0] rs1_out_ex;
-    logic [31:0] rs2_out_ex;
-    logic [31:0] sext_out_ex;
 
-    // debugging DUI variables
-    logic [31:0] pc;
-    logic [31:0] pc_id;
-    logic [31:0] instruction_id;
+    // WB stage outputs
+    logic [4:0]  rd_wb;
+    logic [31:0] rd_data_wb;
+    logic        reg_write_wb;
 
     // Instantiate unit under test
     datapath #(
-        .INSTRUCTION_FILE("src/instruction/instruction_mem.txt"),  // User will provide instruction file
-        .MEMORY_FILE("")
+        .INSTRUCTION_FILE("src/instruction/instruction_mem.txt"),
+        .MEMORY_FILE("src/memory/data.txt")
     ) dut (
         .clk(clk),
         .reset(reset),
-        .pc_ex(pc_ex),
-        .funct7_ex(funct7_ex),
-        .funct3_ex(funct3_ex),
-        .write_mem_ex(write_mem_ex),
-        .opcodes_ex(opcodes_ex),
-        .rd_ex(rd_ex),
-        .wb_sel_ex(wb_sel_ex),
-        .rs1_sel_ex(rs1_sel_ex),
-        .rs2_sel_ex(rs2_sel_ex),
-        .reg_write_ex(reg_write_ex),
-        .rs1_out_ex(rs1_out_ex),
-        .rs2_out_ex(rs2_out_ex),
-        .sext_out_ex(sext_out_ex),
-        // debugging variable
-        .pc(pc),
-        .pc_id(pc_id),
-        .instruction_id(instruction_id)
+        .rd_wb(rd_wb),
+        .rd_data_wb(rd_data_wb),
+        .reg_write_wb(reg_write_wb)
     );
 
     // Clock generation (100MHz)
@@ -57,40 +29,23 @@ module tb;
 
     // Test sequence
     initial begin
+        $dumpfile("waveform.vcd");
+        $dumpvars(0, tb);
         $display("Starting datapath testbench");
 
         // Initialize - hold reset
         reset = 1;
-        #20;  // Hold reset for 20ns
+        #10;
 
         // Release reset
         reset = 0;
         $display("Reset released at time %0t", $time);
 
-        // Monitor for several clock cycles
-        repeat (5) begin
+        repeat (10) begin
             @(posedge clk);
-            #1; // Small delay for signal propagation
-            $display("--------------- t=%0t ---------------", $time);
-            $display("  pc_ex:  %d", pc_ex);
-            $display("  funct7_ex:   %b", funct7_ex);
-            $display("  funct3_ex:   %b", funct3_ex);
-            $display("  write_mem_ex: %b", write_mem_ex);
-            $display("  opcodes_ex:  %d: %b", opcodes_ex, opcodes_ex);
-            $display("  rd_ex:       %b", rd_ex);
-            $display("  wb_sel_ex:   %b", wb_sel_ex);
-            $display("  rs1_sel_ex:  %b", rs1_sel_ex);
-            $display("  rs2_sel_ex:  %b", rs2_sel_ex);
-            $display("  reg_write_ex: %b", reg_write_ex);
-            $display("  rs1_out_ex:  %b", rs1_out_ex);
-            $display("  rs2_out_ex:  %b", rs2_out_ex);
-            $display("  sext_out_ex: %b", sext_out_ex);
-
-            $display("  -- debugging vars --");
-            $display("  pc:    %d", pc);
-            $display("  pc_id: %d: %b", pc_id, pc_id);
-            $display("  instruction_id: %d: %b", instruction_id, instruction_id);
-
+            #1;
+            $display("t=%0t  rd_wb=%0d  rd_data_wb=%0d  reg_write_wb=%b",
+                     $time, rd_wb, rd_data_wb, reg_write_wb);
         end
 
         $display("Testbench completed");

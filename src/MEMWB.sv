@@ -21,7 +21,7 @@ initial begin
     pcplus4_next = '{default: '0};
     rd_next = '{default: '0};
     wb_sel_next = '{default: '0};
-    reg_write_next = '{default: '0};
+    reg_write_next = 1'b0;
     mem_out_next = '{default: '0};
     alu_out_next = '{default: '0};
     sext_out_next = '{default: '0};
@@ -32,7 +32,7 @@ always_ff @(posedge clk) begin
         pcplus4_next <= '{default: '0};
         rd_next <= '{default: '0};
         wb_sel_next <= '{default: '0};
-        reg_write_next <= '{default: '0};
+        reg_write_next <= 1'b0;
         mem_out_next <= '{default: '0};
         alu_out_next <= '{default: '0};
         sext_out_next <= '{default: '0};
