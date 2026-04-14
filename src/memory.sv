@@ -1,4 +1,7 @@
-module memory(
+module memory #(
+    parameter string MEMORY_FILE = ""
+)
+(
     input logic [31:0] address,
     input logic [31:0] write_data,
     input logic write_mem,
@@ -6,7 +9,17 @@ module memory(
     input logic clk,
     input logic reset,
 
-    output logic [31:0] mem_out
+    output logic [31:0] mem_out,
+    output logic [31:0] memory0,
+    output logic [31:0] memory1,
+    output logic [31:0] memory2,
+    output logic [31:0] memory3,
+    output logic [31:0] memory4,
+    output logic [31:0] memory5,
+    output logic [31:0] memory6,
+    output logic [31:0] memory7,
+    output logic [31:0] memory8,
+    output logic [31:0] memory9
 );
 //////////////////////////////////////////////////////////////
 // Since it's not possible to simulate that much memory, we need to limit the memory size before we have disc implemented
@@ -20,7 +33,8 @@ assign byte_offset = address[1:0];
 logic [31:0] memory [255:0];
 
 initial begin
-    memory = '{default: '0};
+    $display("Loading MEMORY memory");
+    if (MEMORY_FILE != "") $readmemb(MEMORY_FILE, memory);
 end
 
 always_comb begin
@@ -56,11 +70,21 @@ always_comb begin
         end
         default: mem_out = 32'bx;
     endcase
+    memory0 = memory[0];
+    memory1 = memory[1];
+    memory2 = memory[2];
+    memory3 = memory[3];
+    memory4 = memory[4];
+    memory5 = memory[5];
+    memory6 = memory[6];
+    memory7 = memory[7];
+    memory8 = memory[8];
+    memory9 = memory[9];
 end
 
 always_ff @(posedge clk) begin
     if (reset) begin
-        foreach (memory[i]) memory[i] <= '0;
+        foreach (memory[i]) memory[i] <= memory[i];
     end else if (write_mem) begin
         case (funct3)
             3'h0: begin // SB

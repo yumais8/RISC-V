@@ -9,7 +9,7 @@ def convert_to_binary(input_file : str, output_file : str = None):
     """
     if output_file is None:
         # Extract filename without path and put output in src/memory/
-        output_file = input_file.split('/')[-1].rsplit('.', 1)[0] + '_binary.txt'
+        output_file = input_file.split('/')[-1].rsplit('.', 1)[0] + '.txt'
         output_folder = f'src/memory'
         if not exists(output_folder):
             os.makedirs(output_folder, exist_ok=True)

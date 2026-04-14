@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0",
+    "version": "2.0.0",
     "tasks": [
         {
             "label": "Build with Verilator",
@@ -24,13 +24,28 @@
                 "src/EXMEM.sv",
                 "src/branchComp.sv",
                 "src/memory.sv",
+                "src/MEMWB.sv",
                 "--exe",
                 "--build",
                 "--trace",
                 "--timing",
+                "--top-module",
+                "tb",
                 "&&",
                 "./obj_dir/Vtb"
-            ]
+            ],
+            "problemMatcher": {
+                "owner": "verilator",
+                "fileLocation": ["relative", "${workspaceFolder}"],
+                "pattern": {
+                    "regexp": "^%(Error|Warning)[^:]*: ([^:]+):(\\d+):(\\d+): (.*)$",
+                    "severity": 1,
+                    "file": 2,
+                    "line": 3,
+                    "column": 4,
+                    "message": 5
+                }
+            }
         }
     ]
 }
