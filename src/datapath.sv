@@ -61,8 +61,8 @@ logic [4:0] rd;
 logic [4:0] rs1;
 logic [4:0] rs2;
 
-assign rs1 = instruction[19:15];
-assign rs2 = instruction[24:20];
+assign rs1 = instruction_id[19:15];
+assign rs2 = instruction_id[24:20];
 logic [31:0] rs1_out;
 logic [31:0] rs2_out;
 
@@ -244,7 +244,7 @@ memory #(
     .MEMORY_FILE(MEMORY_FILE)
 ) data_mem (
     .address(alu_out_mem),
-    .write_data(32'b0),
+    .write_data(alu_out_mem),
     .write_mem(write_mem_mem),
     .funct3(funct3_mem),
     .clk(clk),
