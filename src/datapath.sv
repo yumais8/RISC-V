@@ -16,6 +16,7 @@ logic [31:0] pc_mux_out;
 logic [31:0] pc;
 logic [31:0] pcplus4;
 logic [31:0] instruction;
+logic pc_select;
 
 pc programCounter(
     .clk(clk),
@@ -38,16 +39,25 @@ orchestrationMemory #(
 
 mux2 pc_mux(
     .data1(pcplus4),
-    .data2(32'h0),
-    .select(1'b0),
+    .data2(rs_alu_out),
+    .select(pc_select),
     .out_data(pc_mux_out)
 );
 
-// IF/ID pipeline registers
+// IF/ID stage
 logic [31:0] pc_id;
 logic [31:0] instruction_id;
 
-// ID stage decode signals
+IFID ifid_stage(
+    .reset(reset),
+    .clk(clk),
+    .pc_if(pc),
+    .instruction_if(instruction),
+    .pc_id(pc_id),
+    .instruction_id(instruction_id)
+);
+
+// Decode stage
 logic [6:0] opcodes;
 logic [2:0] funct3;
 logic [6:0] funct7;
@@ -65,34 +75,9 @@ assign rs1 = instruction_id[19:15];
 assign rs2 = instruction_id[24:20];
 logic [31:0] rs1_out;
 logic [31:0] rs2_out;
-
 logic [31:0] immediate_out;
 
-// ID/EX pipeline registers
-logic [31:0] pc_ex;
-logic [6:0]  funct7_ex;
-logic [2:0]  funct3_ex;
-logic        write_mem_ex;
-logic [6:0]  opcodes_ex;
-logic [4:0]  rd_ex;
-logic [1:0]  wb_sel_ex;
-logic        rs1_sel_ex;
-logic        rs2_sel_ex;
-logic        reg_write_ex;
-logic [31:0] rs1_out_ex;
-logic [31:0] rs2_out_ex;
-logic [31:0] sext_out_ex;
 
-IFID ifid_stage(
-    .reset(reset),
-    .clk(clk),
-    .pc(pc),
-    .instruction(instruction),
-    .pc_next(pc_id),
-    .instruction_next(instruction_id)
-);
-
-// Decode stage
 control controller(
     .instruction(instruction_id),
     .opcodes(opcodes),
@@ -123,35 +108,50 @@ sext sign_extension(
     .immediate_o(immediate_out)
 );
 
+// ID/EX pipeline registers
+logic [31:0] pc_ex;
+logic [6:0]  funct7_ex;
+logic [2:0]  funct3_ex;
+logic        write_mem_ex;
+logic [6:0]  opcodes_ex;
+logic [4:0]  rd_ex;
+logic [1:0]  wb_sel_ex;
+logic        rs1_sel_ex;
+logic        rs2_sel_ex;
+logic        reg_write_ex;
+logic [31:0] rs1_out_ex;
+logic [31:0] rs2_out_ex;
+logic [31:0] sext_out_ex;
+
 IDEX idex_stage(
     .clk(clk),
     .reset(reset),
-    .pc(pc_id),
-    .funct7(funct7),
-    .funct3(funct3),
-    .write_mem(write_mem),
-    .opcodes(opcodes),
-    .rd(rd),
-    .wb_sel(wb_sel),
-    .rs1_sel(rs1_sel),
-    .rs2_sel(rs2_sel),
-    .reg_write(reg_write),
-    .rs1_out(rs1_out),
-    .rs2_out(rs2_out),
-    .sext_out(immediate_out),
-    .pc_next(pc_ex),
-    .funct7_next(funct7_ex),
-    .funct3_next(funct3_ex),
-    .write_mem_next(write_mem_ex),
-    .opcodes_next(opcodes_ex),
-    .rd_next(rd_ex),
-    .wb_sel_next(wb_sel_ex),
-    .rs1_sel_next(rs1_sel_ex),
-    .rs2_sel_next(rs2_sel_ex),
-    .reg_write_next(reg_write_ex),
-    .rs1_out_next(rs1_out_ex),
-    .rs2_out_next(rs2_out_ex),
-    .sext_out_next(sext_out_ex)
+    .pc_id(pc_id),
+    .funct7_id(funct7),
+    .funct3_id(funct3),
+    .write_mem_id(write_mem),
+    .opcodes_id(opcodes),
+    .rd_id(rd),
+    .wb_sel_id(wb_sel),
+    .rs1_sel_id(rs1_sel),
+    .rs2_sel_id(rs2_sel),
+    .reg_write_id(reg_write),
+    .rs1_out_id(rs1_out),
+    .rs2_out_id(rs2_out),
+    .sext_out_id(immediate_out),
+    .pc_ex(pc_ex),
+    .funct7_ex(funct7_ex),
+    .funct3_ex(funct3_ex),
+    .write_mem_ex(write_mem_ex),
+    .opcodes_ex(opcodes_ex),
+    .rd_ex(rd_ex),
+    .wb_sel_ex(wb_sel_ex),
+    .rs1_sel_ex(rs1_sel_ex),
+    .rs2_sel_ex(rs2_sel_ex),
+    .reg_write_ex(reg_write_ex),
+    .rs1_out_ex(rs1_out_ex),
+    .rs2_out_ex(rs2_out_ex),
+    .sext_out_ex(sext_out_ex)
 );
 
 // Execute stage
@@ -200,9 +200,17 @@ pcAdder pc_adder_ex(
     .next_pc(pc_plus4_ex)
 );
 
+// pc select signal
+localparam [6:0] jal_opcodes = 7'b1101111;
+localparam [6:0] jalr_opcodes = 7'b1100111;
+localparam [6:0] branch_opcodes = 7'b1100011;
+logic jumpImmediate = (opcodes_ex == jal_opcodes) || (opcodes_ex == jalr_opcodes);
+logic branchOpcodes = opcodes_ex == branch_opcodes;
+
+assign pc_select = jumpImmediate | (branchOpcodes & comp_out);
+
 // EX/MEM pipeline registers
 logic [31:0] alu_out_mem;
-logic        cmp_out_mem;
 logic [6:0]  opcodes_mem;
 logic [4:0]  rd_mem;
 logic [1:0]  wb_sel_mem;
@@ -212,29 +220,27 @@ logic [2:0]  funct3_mem;
 logic [31:0] sext_out_mem;
 logic [31:0] pcplus4_mem;
 
-EXMEM exmem(
+EXMEM exmem_stage(
     .clk(clk),
     .reset(reset),
-    .pcplus4(pc_plus4_ex),
-    .funct3(funct3_ex),
-    .write_mem(write_mem_ex),
-    .opcodes(opcodes_ex),
-    .rd(rd_ex),
-    .wb_sel(wb_sel_ex),
-    .reg_write(reg_write_ex),
-    .alu_out(rs_alu_out),
-    .cmp_out(comp_out),
-    .sext_out(sext_out_ex),
-    .pcplus4_next(pcplus4_mem),
-    .funct3_next(funct3_mem),
-    .write_mem_next(write_mem_mem),
-    .opcodes_next(opcodes_mem),
-    .rd_next(rd_mem),
-    .wb_sel_next(wb_sel_mem),
-    .reg_write_next(reg_write_mem),
-    .alu_out_next(alu_out_mem),
-    .cmp_out_next(cmp_out_mem),
-    .sext_out_next(sext_out_mem)
+    .pcplus4_ex(pc_plus4_ex),
+    .funct3_ex(funct3_ex),
+    .write_mem_ex(write_mem_ex),
+    .opcodes_ex(opcodes_ex),
+    .rd_ex(rd_ex),
+    .wb_sel_ex(wb_sel_ex),
+    .reg_write_ex(reg_write_ex),
+    .alu_out_ex(rs_alu_out),
+    .sext_out_ex(sext_out_ex),
+    .pcplus4_mem(pcplus4_mem),
+    .funct3_mem(funct3_mem),
+    .write_mem_mem(write_mem_mem),
+    .opcodes_mem(opcodes_mem),
+    .rd_mem(rd_mem),
+    .wb_sel_mem(wb_sel_mem),
+    .reg_write_mem(reg_write_mem),
+    .alu_out_mem(alu_out_mem),
+    .sext_out_mem(sext_out_mem)
 );
 
 // MEM stage
@@ -242,7 +248,7 @@ logic [31:0] mem_data_out;
 
 memory #(
     .MEMORY_FILE(MEMORY_FILE)
-) data_mem (
+) data_memory (
     .address(alu_out_mem),
     .write_data(alu_out_mem),
     .write_mem(write_mem_mem),
@@ -267,35 +273,34 @@ logic [1:0] wb_select_wb;
 logic [31:0] mem_data_wb;
 logic [31:0] alu_data_wb;
 logic [31:0] sext_out_wb;
-// logic reg_write_wb;
-// logic [4:0] rd_wb
 
 
-MEMWB writeback(
+// MEM WB stage
+MEMWB memwb_stage(
     .clk(clk),
     .reset(reset),
-    .pcplus4(pcplus4_mem),
-    .rd(rd_mem),
-    .wb_sel(wb_sel_mem),
-    .reg_write(reg_write_mem),
-    .mem_out(mem_data_out),
-    .alu_out(alu_out_mem),
-    .sext_out(sext_out_mem),
-    .pcplus4_next(pcplus4_wb),
-    .rd_next(rd_wb),
-    .wb_sel_next(wb_select_wb),
-    .reg_write_next(reg_write_wb),
-    .mem_out_next(mem_data_wb),
-    .alu_out_next(alu_data_wb),
-    .sext_out_next(sext_out_wb)
+    .pcplus4_mem(pcplus4_mem),
+    .rd_mem(rd_mem),
+    .wb_sel_mem(wb_sel_mem),
+    .reg_write_mem(reg_write_mem),
+    .mem_out_mem(mem_data_out),
+    .alu_out_mem(alu_out_mem),
+    .sext_out_mem(sext_out_mem),
+    .pcplus4_wb(pcplus4_wb),
+    .rd_wb(rd_wb),
+    .wb_sel_wb(wb_select_wb),
+    .reg_write_wb(reg_write_wb),
+    .mem_out_wb(mem_data_wb),
+    .alu_out_wb(alu_data_wb),
+    .sext_out_wb(sext_out_wb)
 );
 
 // WB stage: select writeback data
 mux4 wb_mux(
-    .option0(alu_data_wb),
+    .option0(pcplus4_wb),
     .option1(mem_data_wb),
-    .option2(pcplus4_wb),
-    .option3(sext_out_wb),
+    .option2(sext_out_wb),
+    .option3(alu_data_wb),
     .select(wb_select_wb),
     .mux_out(rd_data_wb)
 );

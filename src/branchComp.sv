@@ -12,8 +12,8 @@ always_comb begin
     case (funct3)
         3'h0: comp_out = rs1 == rs2 ? true : false;
         3'h1: comp_out = rs1 != rs2 ? true : false;
-        3'h4: comp_out = rs1 < rs2 ? true : false;
-        3'h5: comp_out = rs1 >= rs2 ? true : false;
+        3'h4: comp_out = $signed(rs1) < $signed(rs2) ? true : false;
+        3'h5: comp_out = $signed(rs1) >= $signed(rs2) ? true : false;
         3'h6: comp_out = $unsigned(rs1) < $unsigned(rs2) ? true : false;
         3'h7: comp_out = $unsigned(rs1) >= $unsigned(rs2) ? true: false;
         default: comp_out = false;
