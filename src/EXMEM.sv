@@ -10,6 +10,7 @@ module EXMEM (
     input logic reg_write_ex,
     input logic [31:0] alu_out_ex,
     input logic [31:0] sext_out_ex,
+    input logic [31:0] rs2_out_ex,
 
     output logic [31:0] pcplus4_mem,
     output logic [2:0] funct3_mem,
@@ -19,7 +20,8 @@ module EXMEM (
     output logic [1:0] wb_sel_mem,
     output logic reg_write_mem,
     output logic [31:0] alu_out_mem,
-    output logic [31:0] sext_out_mem
+    output logic [31:0] sext_out_mem,
+    output logic [31:0] rs2_out_mem
 );
 
 initial begin
@@ -32,6 +34,7 @@ initial begin
     reg_write_mem = '0;
     alu_out_mem = '0;
     sext_out_mem = '0;
+    rs2_out_mem = '0;
 end
 
 always_ff @(posedge clk) begin
@@ -45,6 +48,7 @@ always_ff @(posedge clk) begin
         reg_write_mem <= '0;
         alu_out_mem <= '0;
         sext_out_mem <= '0;
+        rs2_out_mem <= '0;
     end else begin
         pcplus4_mem <= pcplus4_ex;
         funct3_mem <= funct3_ex;
@@ -55,6 +59,7 @@ always_ff @(posedge clk) begin
         reg_write_mem <= reg_write_ex;
         alu_out_mem <= alu_out_ex;
         sext_out_mem <= sext_out_ex;
+        rs2_out_mem <= rs2_out_ex;
     end
 end
 endmodule

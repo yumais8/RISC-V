@@ -28,8 +28,8 @@ always_comb begin
                 3'h5: 
                 begin
                     case (funct7)
-                        7'h00: rs_out = rs1 >>> rs2; // logical shift right
-                        7'h20: rs_out = $signed(rs1) >> rs2;   // arithmetic shift right
+                        7'h00: rs_out = rs1 >> rs2; // logical shift right
+                        7'h20: rs_out = $signed(rs1) >>> rs2;  // arithmetic shift right
                         default: rs_out = 32'hxxxxxxxx;
                     endcase
                 end
@@ -49,7 +49,7 @@ always_comb begin
                 begin
                     case (funct7)
                         7'h00: rs_out = rs1 >> (SHAMT5 & rs2);  // logical shift right
-                        7'h20: rs_out = $signed(rs1) >> (SHAMT5 & rs2); // arithmetic shift right
+                        7'h20: rs_out = $signed(rs1) >>> (SHAMT5 & rs2); // arithmetic shift right
                         default: rs_out = 32'hxxxxxxxx;
                     endcase
                 end

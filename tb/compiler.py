@@ -9,7 +9,11 @@ cnv = AssemblyConverter(output_mode='f')
 #
 # Findings (from inspecting riscv_assembler/instr_arr.py + live verification):
 #   R-type  (add/sub/…)      : CORRECT  — use library output as-is
+#   R-type  (slt/sltu)       : MISSING — not in library instruction table
+#                               → patched by encode_r_type()
 #   I-type  (addi/lw/…)      : CORRECT  — use library output as-is
+#   I-load  (lb/lh/lbu/lhu)  : MISSING — not in library instruction table
+#                               → patched by encode_i_load()
 #   S-type  (sw/sb/sh/sd)    : BUG — lower imm field encodes imm[3:0]|imm[10]
 #                               instead of imm[4:0]; upper field is also shifted
 #                               → patched by encode_s_type()
@@ -33,6 +37,107 @@ REG_MAP.update({
     's6':22,'s7':23,'s8':24,'s9':25,'s10':26,'s11':27,
     't3':28,'t4':29,'t5':30,'t6':31,
 })
+
+# ---------------------------------------------------------------------------
+# R-type encoder (slt, sltu — and any other R-type ops the library misses)
+# RISC-V spec: funct7 | rs2 | rs1 | funct3 | rd | opcode(0110011)
+# Library limitation: slt/sltu are absent from its instruction table.
+# ---------------------------------------------------------------------------
+R_TYPE_INFO = {
+    'add':  ('0000000', '000'),
+    'sub':  ('0100000', '000'),
+    'xor':  ('0000000', '100'),
+    'or':   ('0000000', '110'),
+    'and':  ('0000000', '111'),
+    'sll':  ('0000000', '001'),
+    'srl':  ('0000000', '101'),
+    'sra':  ('0100000', '101'),
+    'slt':  ('0000000', '010'),
+    'sltu': ('0000000', '011'),
+}
+R_TYPE_UNSUPPORTED = {'slt', 'sltu'}
+
+def encode_r_type(asm_line):
+    """Correctly encode an R-type instruction into a 32-bit binary string."""
+    tokens = re.split(r'[\s,]+', asm_line.strip().lower())
+    op  = tokens[0]
+    rd  = REG_MAP[tokens[1]]
+    rs1 = REG_MAP[tokens[2]]
+    rs2 = REG_MAP[tokens[3]]
+    funct7, funct3 = R_TYPE_INFO[op]
+
+    return (funct7
+            + format(rs2, '05b')
+            + format(rs1, '05b')
+            + funct3
+            + format(rd, '05b')
+            + '0110011')
+
+# ---------------------------------------------------------------------------
+# I-type ALU encoder (xori, ori, andi, slli, srli, srai, slti, sltiu)
+# RISC-V spec:
+#   Non-shift: imm[11:0]           | rs1 | funct3 | rd | opcode(0010011)
+#   Shift:     funct7 | shamt[4:0] | rs1 | funct3 | rd | opcode(0010011)
+# Library limitation: only recognises addi; the rest are absent from its
+# instruction table and cause a crash.
+# ---------------------------------------------------------------------------
+I_ALU_FUNCT3 = {
+    'addi': '000', 'xori': '100', 'ori': '110', 'andi': '111',
+    'slli': '001', 'srli': '101', 'srai': '101',
+    'slti': '010', 'sltiu': '011',
+}
+I_ALU_SHIFT_FUNCT7 = {'slli': '0000000', 'srli': '0000000', 'srai': '0100000'}
+I_ALU_UNSUPPORTED = {'xori', 'ori', 'andi', 'slli', 'srli', 'srai', 'slti', 'sltiu'}
+
+def encode_i_alu(asm_line):
+    """Correctly encode an I-type ALU instruction into a 32-bit binary string."""
+    tokens = re.split(r'[\s,]+', asm_line.strip().lower())
+    op  = tokens[0]
+    rd  = REG_MAP[tokens[1]]
+    rs1 = REG_MAP[tokens[2]]
+    imm = int(tokens[3])
+
+    funct3 = I_ALU_FUNCT3[op]
+
+    if op in I_ALU_SHIFT_FUNCT7:
+        shamt = imm & 0x1F
+        return (I_ALU_SHIFT_FUNCT7[op]
+                + format(shamt, '05b')
+                + format(rs1, '05b')
+                + funct3
+                + format(rd, '05b')
+                + '0010011')
+    else:
+        return (format(imm & 0xFFF, '012b')
+                + format(rs1, '05b')
+                + funct3
+                + format(rd, '05b')
+                + '0010011')
+
+# ---------------------------------------------------------------------------
+# I-type load encoder (lb, lh, lw, lbu, lhu)
+# RISC-V spec: imm[11:0] | rs1 | funct3 | rd | opcode(0000011)
+# Library limitation: only recognises lw; lb/lh/lbu/lhu are absent from its
+# instruction table and cause a crash.
+# ---------------------------------------------------------------------------
+I_LOAD_FUNCT3 = {'lb': '000', 'lh': '001', 'lw': '010', 'lbu': '100', 'lhu': '101'}
+
+def encode_i_load(asm_line):
+    """Correctly encode an I-type load instruction into a 32-bit binary string."""
+    tokens = re.split(r'[\s,]+', asm_line.strip().lower())
+    op  = tokens[0]
+    rd  = REG_MAP[tokens[1]]
+    m   = re.match(r'(-?\d+)\((\w+)\)', tokens[2])
+    imm = int(m.group(1))
+    rs1 = REG_MAP[m.group(2)]
+
+    imm_bin = format(imm & 0xFFF, '012b')
+
+    return (imm_bin
+            + format(rs1, '05b')
+            + I_LOAD_FUNCT3[op]
+            + format(rd, '05b')
+            + '0000011')
 
 # ---------------------------------------------------------------------------
 # S-type encoder (sw, sb, sh, sd)
@@ -168,13 +273,14 @@ def resolve_labels(asm_lines):
 B_TYPE_OPS = set(B_TYPE_FUNCT3)
 J_TYPE_OPS = set(J_TYPE_OPCODE)
 U_TYPE_OPS = set(U_TYPE_OPCODE)
+I_LOAD_UNSUPPORTED = I_LOAD_FUNCT3.keys() - {'lw'}
 
 # The library has bugs in J-type, U-type, and B-type encoders.  Substitute
 # those lines with a NOP (addi x0,x0,0) so the library processes the file
 # without crashing — instruction count is preserved so the file length matches.
 _NOP = 'addi x0, x0, 0'
 
-with open('tb/test0.s', 'r') as f:
+with open('tb/test_itype.s', 'r') as f:
     assembly_lines = f.readlines()
 
 def _make_library_safe(lines):
@@ -185,7 +291,7 @@ def _make_library_safe(lines):
             safe.append(line)
             continue
         op = s.lower().split()[0]
-        safe.append((_NOP + '\n') if op in J_TYPE_OPS | U_TYPE_OPS | B_TYPE_OPS else line)
+        safe.append((_NOP + '\n') if op in J_TYPE_OPS | U_TYPE_OPS | B_TYPE_OPS | I_LOAD_UNSUPPORTED | R_TYPE_UNSUPPORTED | I_ALU_UNSUPPORTED else line)
     return safe
 
 safe_code = ''.join(_make_library_safe(assembly_lines))
@@ -208,13 +314,19 @@ with open('src/instruction/instruction_mem.txt', 'r') as f:
 labels = resolve_labels(assembly_lines)
 
 # Patch instructions whose library encoding is incorrect.
-# R-type, I-type: library output is correct — kept as-is.
-# S-type, B-type, J-type, U-type: re-encoded with our own correct encoders.
+# R-type, I-type (addi/lw): library output is correct — kept as-is.
+# I-load (lb/lh/lbu/lhu), S-type, B-type, J-type, U-type: re-encoded with our own encoders.
 fixed_lines = []
 pc = 0
 for bin_line, asm_line in zip(binary_lines, asm_instructions):
     op = asm_line.lower().split()[0]
-    if op in S_TYPE_FUNCT3:
+    if op in R_TYPE_UNSUPPORTED:
+        fixed_lines.append(encode_r_type(asm_line))
+    elif op in I_ALU_UNSUPPORTED:
+        fixed_lines.append(encode_i_alu(asm_line))
+    elif op in I_LOAD_UNSUPPORTED:
+        fixed_lines.append(encode_i_load(asm_line))
+    elif op in S_TYPE_FUNCT3:
         fixed_lines.append(encode_s_type(asm_line))
     elif op in B_TYPE_OPS:
         fixed_lines.append(encode_b_type(asm_line, pc, labels))

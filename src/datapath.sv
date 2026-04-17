@@ -219,6 +219,7 @@ logic        write_mem_mem;
 logic [2:0]  funct3_mem;
 logic [31:0] sext_out_mem;
 logic [31:0] pcplus4_mem;
+logic [31:0] rs2_out_mem;
 
 EXMEM exmem_stage(
     .clk(clk),
@@ -232,6 +233,7 @@ EXMEM exmem_stage(
     .reg_write_ex(reg_write_ex),
     .alu_out_ex(rs_alu_out),
     .sext_out_ex(sext_out_ex),
+    .rs2_out_ex(rs2_out_ex),
     .pcplus4_mem(pcplus4_mem),
     .funct3_mem(funct3_mem),
     .write_mem_mem(write_mem_mem),
@@ -240,7 +242,8 @@ EXMEM exmem_stage(
     .wb_sel_mem(wb_sel_mem),
     .reg_write_mem(reg_write_mem),
     .alu_out_mem(alu_out_mem),
-    .sext_out_mem(sext_out_mem)
+    .sext_out_mem(sext_out_mem),
+    .rs2_out_mem(rs2_out_mem)
 );
 
 // MEM stage
@@ -250,7 +253,7 @@ memory #(
     .MEMORY_FILE(MEMORY_FILE)
 ) data_memory (
     .address(alu_out_mem),
-    .write_data(alu_out_mem),
+    .write_data(rs2_out_mem),
     .write_mem(write_mem_mem),
     .funct3(funct3_mem),
     .clk(clk),
