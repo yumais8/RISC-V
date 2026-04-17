@@ -7,8 +7,7 @@ module alu(
     output logic [31:0] rs_out
 );
 
-localparam SHAMT5 = 32'h00000005;// {5{1'b1}};
-localparam [31:0] SHAMT12 = 32'h00000FFF;
+localparam SHAMT5 = 32'h0000001F; // {5{1'b1}}
 
 always_comb begin
     case (opcodes)
@@ -29,8 +28,8 @@ always_comb begin
                 3'h5: 
                 begin
                     case (funct7)
-                        7'h00: rs_out = rs1 >>> rs2; // logical shift right
-                        7'h20: rs_out = $signed(rs1) >> rs2;   // arithmetic shift right
+                        7'h00: rs_out = rs1 >> rs2; // logical shift right
+                        7'h20: rs_out = $signed(rs1) >>> rs2;  // arithmetic shift right
                         default: rs_out = 32'hxxxxxxxx;
                     endcase
                 end
@@ -41,21 +40,21 @@ always_comb begin
         7'b0010011:// I - Type
         begin
             case (funct3)
-                3'h0: rs_out = rs1 + (SHAMT12 & rs2);   // logic [31:0] rs2 = {{20{imm[11]}}, imm};  // manual sign extension
-                3'h4: rs_out = rs1 ^ (SHAMT12 & rs2);
-                3'h6: rs_out = rs1 | (SHAMT12 & rs2);
-                3'h7: rs_out = rs1 & (SHAMT12 & rs2);
+                3'h0: rs_out = rs1 + rs2;
+                3'h4: rs_out = rs1 ^ rs2;
+                3'h6: rs_out = rs1 | rs2;
+                3'h7: rs_out = rs1 & rs2;
                 3'h1: rs_out = rs1 << (SHAMT5 & rs2);   // logical shift left
                 3'h5: 
                 begin
                     case (funct7)
                         7'h00: rs_out = rs1 >> (SHAMT5 & rs2);  // logical shift right
-                        7'h20: rs_out = $signed(rs1) >> (SHAMT5 & rs2); // arithmetic shift right
+                        7'h20: rs_out = $signed(rs1) >>> (SHAMT5 & rs2); // arithmetic shift right
                         default: rs_out = 32'hxxxxxxxx;
                     endcase
                 end
-                3'h2: rs_out = (rs1 < $signed(SHAMT12 & rs2)) ? 1 : 0;
-                3'h3: rs_out = (rs1 < $unsigned(SHAMT12 & rs2)) ? 1 : 0;
+                3'h2: rs_out = ($signed(rs1) < $signed(rs2)) ? 1 : 0;
+                3'h3: rs_out = ($unsigned(rs1) < $unsigned(rs2)) ? 1 : 0;
             endcase
         end
         7'b0000011: rs_out = rs1 + rs2; // Load: adding rs1 with whatever extended imm, and send address to memory to load

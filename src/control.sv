@@ -57,7 +57,7 @@ always_comb begin
                 write_mem = 1'b1;
                 wb_sel = 2'b00; // no write bakc
                 reg_write = 1'b0;
-                rd = instruction[24:20]; // rs2
+                rd = 5'bx; // rs2
             end 
         7'b1100011: // B - Type
             begin
