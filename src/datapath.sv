@@ -165,7 +165,7 @@ logic [31:0] pc_plus4_ex;
 logic [31:0] rs1_out_fwd;
 logic [31:0] rs2_out_fwd;
 
-mux4 rs1_forward(
+mux4 rs1_fwd_mux(
     .option0(rs1_out_ex),
     .option1(/* forwarding for alu out */),
     .option2(/* fowarding from memory out */),
@@ -174,7 +174,7 @@ mux4 rs1_forward(
     .mux_out(rs1_out_fwd)
 )
 
-mux4 rs2_forward(
+mux4 rs2_fwd_mux(
     .option0(rs2_out_ex),
     .option1(),
     .option2(),
