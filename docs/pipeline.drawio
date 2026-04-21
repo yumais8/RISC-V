@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36">
   <diagram name="Page-1" id="yanbV1KbsqMr2lDQK4xy">
-    <mxGraphModel dx="479" dy="1430" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="671" dy="1562" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -474,15 +474,15 @@
         <mxCell id="kvCiwVNzLlIkUim2DnyA-66" edge="1" parent="1" source="FF9bQbn-0qO4At2gGqnb-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=-0.044;entryY=0.112;entryDx=0;entryDy=0;entryPerimeter=0;" target="0HOKAxKtm6BnJxTn4o8y-21">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="kvCiwVNzLlIkUim2DnyA-71" edge="1" parent="1" source="wKD0sN0sYzeV7CEb2FFm-108" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=1;entryDx=10;entryDy=0;entryPerimeter=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;" target="xIO_9tcu07py7rVRYG_1-13">
+        <mxCell id="kvCiwVNzLlIkUim2DnyA-71" edge="1" parent="1" source="0HOKAxKtm6BnJxTn4o8y-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=1;entryDx=10;entryDy=0;entryPerimeter=0;exitX=1.028;exitY=0.294;exitDx=0;exitDy=0;exitPerimeter=0;" target="xIO_9tcu07py7rVRYG_1-13">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1530" y="78" />
-              <mxPoint x="1530" y="-210" />
+              <mxPoint x="1620" y="79" />
+              <mxPoint x="1620" y="-210" />
               <mxPoint x="330" y="-210" />
               <mxPoint x="330" y="75" />
             </Array>
-            <mxPoint x="1690" y="110" as="sourcePoint" />
+            <mxPoint x="1620" y="80" as="sourcePoint" />
             <mxPoint x="87" y="-100" as="targetPoint" />
           </mxGeometry>
         </mxCell>
@@ -491,9 +491,9 @@
             <mxPoint x="-6" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="kvCiwVNzLlIkUim2DnyA-73" connectable="0" parent="kvCiwVNzLlIkUim2DnyA-71" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=7;horizontal=0;" value="pc_select" vertex="1">
+        <mxCell id="kvCiwVNzLlIkUim2DnyA-73" connectable="0" parent="kvCiwVNzLlIkUim2DnyA-71" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=7;horizontal=1;labelBackgroundColor=none;" value="pc_select" vertex="1">
           <mxGeometry relative="1" x="-0.9506" as="geometry">
-            <mxPoint x="5" y="21" as="offset" />
+            <mxPoint x="-19" y="4" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="kvCiwVNzLlIkUim2DnyA-68" parent="1" style="verticalLabelPosition=bottom;shadow=0;dashed=0;align=center;html=1;verticalAlign=top;shape=mxgraph.electrical.logic_gates.logic_gate;operation=and;" value="" vertex="1">
@@ -1565,6 +1565,11 @@
         <mxCell id="RPwnbQx-jI047j9ntg33-12" connectable="0" parent="RPwnbQx-jI047j9ntg33-11" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=7;labelBackgroundColor=none;" value="alu_out_fwd_wb" vertex="1">
           <mxGeometry relative="1" x="0.219" y="1" as="geometry">
             <mxPoint x="2" y="-4" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="RPwnbQx-jI047j9ntg33-15" edge="1" parent="1" source="wKD0sN0sYzeV7CEb2FFm-108" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1550" y="77" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>
