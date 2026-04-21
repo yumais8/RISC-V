@@ -39,8 +39,8 @@ orchestrationMemory #(
 
 mux2 pc_mux(
     .data1(pcplus4),
-    .data2(rs_alu_out),
-    .select(pc_select),
+    .data2(alu_out_mem),
+    .select(pc_select_mem),
     .out_data(pc_mux_out)
 );
 
@@ -161,21 +161,39 @@ logic [31:0] rs_alu_out;
 logic        comp_out;
 logic [31:0] pc_plus4_ex;
 
-mux4 rs1_mux(
+
+logic [31:0] rs1_out_fwd;
+logic [31:0] rs2_out_fwd;
+
+mux4 rs1_forward(
+    .option0(rs1_out_ex),
+    .option1(/* forwarding for alu out */),
+    .option2(/* fowarding from memory out */),
+    .option3(/* fowarding from wb out */),
+    .select(/* fowarding unit for rs1 select */),
+    .mux_out(rs1_out_fwd)
+)
+
+mux4 rs2_forward(
+    .option0(rs2_out_ex),
+    .option1(),
+    .option2(),
+    .option3(),
+    .select(),
+    .mux_out(rs2_out_fwd)
+)
+
+mux2 rs1_mux(
     .option0(pc_ex),
-    .option1(rs1_out_ex),
-    .option2(/* alu forwarding */ 32'b1),
-    .option3(/* memory output */ 32'd2),
-    .select({1'b0 /* from forwarding unit */, rs1_sel_ex}),
+    .option1(rs1_out_fwd),
+    .select(rs1_sel_ex),
     .mux_out(rs1_alu_in)
 );
 
-mux4 rs2_mux(
-    .option0(rs2_out_ex),
-    .option1(sext_out_ex),
-    .option2(/* alu forwarding */ 32'b1),
-    .option3(/* memory output */ 32'd2),
-    .select({1'b0 /* from forwarding unit */, rs2_sel_ex}),
+mux2 rs2_mux(
+    .option0(sext_out_ex),
+    .option1(rs2_out_fwd),
+    .select(rs2_sel_ex),
     .mux_out(rs2_alu_in)
 );
 
@@ -220,6 +238,7 @@ logic [2:0]  funct3_mem;
 logic [31:0] sext_out_mem;
 logic [31:0] pcplus4_mem;
 logic [31:0] rs2_out_mem;
+logic pc_select_mem;
 
 EXMEM exmem_stage(
     .clk(clk),
@@ -234,6 +253,7 @@ EXMEM exmem_stage(
     .alu_out_ex(rs_alu_out),
     .sext_out_ex(sext_out_ex),
     .rs2_out_ex(rs2_out_ex),
+    .pc_select_ex(pc_select),
     .pcplus4_mem(pcplus4_mem),
     .funct3_mem(funct3_mem),
     .write_mem_mem(write_mem_mem),
@@ -243,7 +263,8 @@ EXMEM exmem_stage(
     .reg_write_mem(reg_write_mem),
     .alu_out_mem(alu_out_mem),
     .sext_out_mem(sext_out_mem),
-    .rs2_out_mem(rs2_out_mem)
+    .rs2_out_mem(rs2_out_mem),
+    .pc_select_mem(pc_select_mem)
 );
 
 // MEM stage
