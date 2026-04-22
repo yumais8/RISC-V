@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36">
   <diagram name="Page-1" id="yanbV1KbsqMr2lDQK4xy">
-    <mxGraphModel dx="437" dy="1401" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="745" dy="1613" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -792,13 +792,6 @@
             <Array as="points" />
             <mxPoint x="470" y="367" as="sourcePoint" />
             <mxPoint x="470.0000000000001" y="365" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="wKD0sN0sYzeV7CEb2FFm-105" edge="1" parent="1" source="0HOKAxKtm6BnJxTn4o8y-21" style="edgeStyle=orthogonalEdgeStyle;orthogonalLoop=1;jettySize=auto;html=1;rounded=0;exitX=0.978;exitY=0.112;exitDx=0;exitDy=0;exitPerimeter=0;endArrow=none;endFill=0;entryDx=0;entryDy=0;entryPerimeter=0;" value="">
-          <mxGeometry relative="1" width="80" as="geometry">
-            <Array as="points" />
-            <mxPoint x="1529" y="-20" as="sourcePoint" />
-            <mxPoint x="1540" y="-20" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="wKD0sN0sYzeV7CEb2FFm-108" parent="1" style="verticalLabelPosition=bottom;shadow=0;dashed=0;align=center;html=1;verticalAlign=top;shape=mxgraph.electrical.logic_gates.logic_gate;operation=or;" value="" vertex="1">
