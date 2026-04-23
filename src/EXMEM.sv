@@ -11,7 +11,7 @@ module EXMEM (
     input logic [31:0] alu_out_ex,
     input logic [31:0] sext_out_ex,
     input logic [31:0] rs2_out_ex,
-    input logoc pc_select_ex,
+    input logic pc_select_ex,
 
     output logic [31:0] pcplus4_mem,
     output logic [2:0] funct3_mem,

@@ -280,7 +280,7 @@ I_LOAD_UNSUPPORTED = I_LOAD_FUNCT3.keys() - {'lw'}
 # without crashing — instruction count is preserved so the file length matches.
 _NOP = 'addi x0, x0, 0'
 
-with open('tb/test_itype.s', 'r') as f:
+with open('tb/test_hazards.s', 'r') as f:
     assembly_lines = f.readlines()
 
 def _make_library_safe(lines):

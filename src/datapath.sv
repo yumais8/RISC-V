@@ -21,6 +21,7 @@ logic pc_select;
 pc programCounter(
     .clk(clk),
     .reset(reset),
+    .stall(stall),
     .pc(pc_mux_out),
     .pc_next(pc)
 );
@@ -51,6 +52,7 @@ logic [31:0] instruction_id;
 IFID ifid_stage(
     .reset(reset),
     .clk(clk),
+    .stall(stall),
     .pc_if(pc),
     .instruction_if(instruction),
     .pc_id(pc_id),
@@ -122,10 +124,13 @@ logic        reg_write_ex;
 logic [31:0] rs1_out_ex;
 logic [31:0] rs2_out_ex;
 logic [31:0] sext_out_ex;
+logic [4:0] rs1_ex;
+logic [4:0] rs2_ex;
 
 IDEX idex_stage(
     .clk(clk),
     .reset(reset),
+    .stall(stall),
     .pc_id(pc_id),
     .funct7_id(funct7),
     .funct3_id(funct3),
@@ -139,6 +144,8 @@ IDEX idex_stage(
     .rs1_out_id(rs1_out),
     .rs2_out_id(rs2_out),
     .sext_out_id(immediate_out),
+    .rs1_id(rs1),
+    .rs2_id(rs2),
     .pc_ex(pc_ex),
     .funct7_ex(funct7_ex),
     .funct3_ex(funct3_ex),
@@ -151,7 +158,9 @@ IDEX idex_stage(
     .reg_write_ex(reg_write_ex),
     .rs1_out_ex(rs1_out_ex),
     .rs2_out_ex(rs2_out_ex),
-    .sext_out_ex(sext_out_ex)
+    .sext_out_ex(sext_out_ex),
+    .rs1_ex(rs1_ex),
+    .rs2_ex(rs2_ex)
 );
 
 // Execute stage
@@ -161,40 +170,54 @@ logic [31:0] rs_alu_out;
 logic        comp_out;
 logic [31:0] pc_plus4_ex;
 
-
 logic [31:0] rs1_out_fwd;
 logic [31:0] rs2_out_fwd;
+logic [1:0] rs1_fwd_mux_sel;
+logic [1:0] rs2_fwd_mux_sel;
+logic stall;
+
+forwarding forwarding_unit(
+    .rs1_ex(rs1_ex),
+    .rs2_ex(rs2_ex),
+    .rd_mem(rd_mem),
+    .rd_wb(rd_wb),
+    .wb_sel_mem(wb_sel_mem),
+    .wb_sel_wb(wb_select_wb),
+    .rs1_fwd_mux_sel(rs1_fwd_mux_sel),
+    .rs2_fwd_mux_sel(rs2_fwd_mux_sel),
+    .stall(stall)
+);
 
 mux4 rs1_fwd_mux(
     .option0(rs1_out_ex),
-    .option1(/* forwarding for alu out */),
-    .option2(/* fowarding from memory out */),
-    .option3(/* fowarding from wb out */),
-    .select(/* fowarding unit for rs1 select */),
+    .option1(alu_out_mem),
+    .option2(alu_data_wb),
+    .option3(mem_data_wb),
+    .select(rs1_fwd_mux_sel),
     .mux_out(rs1_out_fwd)
-)
+);
 
 mux4 rs2_fwd_mux(
     .option0(rs2_out_ex),
-    .option1(),
-    .option2(),
-    .option3(),
-    .select(),
+    .option1(alu_out_mem),
+    .option2(alu_data_wb),
+    .option3(mem_data_wb),
+    .select(rs2_fwd_mux_sel),
     .mux_out(rs2_out_fwd)
-)
+);
 
 mux2 rs1_mux(
-    .option0(pc_ex),
-    .option1(rs1_out_fwd),
+    .data1(pc_ex),
+    .data2(rs1_out_fwd),
     .select(rs1_sel_ex),
-    .mux_out(rs1_alu_in)
+    .out_data(rs1_alu_in)
 );
 
 mux2 rs2_mux(
-    .option0(sext_out_ex),
-    .option1(rs2_out_fwd),
+    .data1(sext_out_ex),
+    .data2(rs2_out_fwd),
     .select(rs2_sel_ex),
-    .mux_out(rs2_alu_in)
+    .out_data(rs2_alu_in)
 );
 
 alu alu(
@@ -242,7 +265,7 @@ logic pc_select_mem;
 
 EXMEM exmem_stage(
     .clk(clk),
-    .reset(reset),
+    .reset(reset || stall),  // when forwarding wants to stall, it means EXMEM needs to insert 1 no ops for the next cycle 
     .pcplus4_ex(pc_plus4_ex),
     .funct3_ex(funct3_ex),
     .write_mem_ex(write_mem_ex),
@@ -252,7 +275,7 @@ EXMEM exmem_stage(
     .reg_write_ex(reg_write_ex),
     .alu_out_ex(rs_alu_out),
     .sext_out_ex(sext_out_ex),
-    .rs2_out_ex(rs2_out_ex),
+    .rs2_out_ex(rs2_out_fwd),
     .pc_select_ex(pc_select),
     .pcplus4_mem(pcplus4_mem),
     .funct3_mem(funct3_mem),
@@ -297,7 +320,6 @@ logic [1:0] wb_select_wb;
 logic [31:0] mem_data_wb;
 logic [31:0] alu_data_wb;
 logic [31:0] sext_out_wb;
-
 
 // MEM WB stage
 MEMWB memwb_stage(
