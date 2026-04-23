@@ -1,6 +1,7 @@
 module IFID(
     input logic reset,
     input logic clk,
+    input logic stall,
     input logic [31:0] pc_if,
     input logic [31:0] instruction_if,
     output logic [31:0] pc_id,
@@ -16,6 +17,9 @@ always_ff @(posedge clk) begin
     if (reset) begin
         pc_id <= '{default: '0};
         instruction_id <= '{default: '0};
+    end else if(stall) begin
+        pc_id <= pc_id;
+        instruction_id <= instruction_id;
     end else begin
         pc_id <= pc_if;
         instruction_id <= instruction_if;

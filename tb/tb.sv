@@ -41,7 +41,7 @@ module tb;
         reset = 0;
         $display("Reset released at time %0t", $time);
 
-        repeat (80) begin
+        repeat (70) begin
             @(posedge clk);
             #1;
             $display("t=%0t  rd_wb=%0d  rd_data_wb=%0d  reg_write_wb=%b",

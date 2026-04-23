@@ -25,6 +25,7 @@
                 "src/branchComp.sv",
                 "src/memory.sv",
                 "src/MEMWB.sv",
+                "src/forwarding.sv",
                 "--exe",
                 "--build",
                 "--trace",

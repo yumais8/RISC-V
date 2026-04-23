@@ -20,13 +20,14 @@ assign opcodes = instruction[6:0];
 assign funct3 = instruction[14:12];
 assign funct7 = instruction[31:25];
 assign destination_reg = instruction[11:7];
+localparam no_writeback_reg = 5'b00000; // When no write back needed, this is a sign
 
 always_comb begin
     case (opcodes)
         7'b0110011: // R-Type 
             begin 
                 rs1_sel = 1'b1;
-                rs2_sel = 1'b0;
+                rs2_sel = 1'b1;
                 write_mem = 1'b0;
                 wb_sel = 2'b11;
                 reg_write = 1'b1;
@@ -35,7 +36,7 @@ always_comb begin
         7'b0010011: // I - Type
             begin
                 rs1_sel = 1'b1;
-                rs2_sel = 1'b1;    // immediate
+                rs2_sel = 1'b0;    // immediate
                 write_mem = 1'b0;
                 wb_sel = 2'b11;
                 reg_write = 1'b1;
@@ -44,7 +45,7 @@ always_comb begin
         7'b0000011: // Load
             begin
                 rs1_sel = 1'b1;
-                rs2_sel = 1'b1;
+                rs2_sel = 1'b0;
                 write_mem = 1'b0;
                 wb_sel = 2'b01; // memory 
                 reg_write = 1'b1;
@@ -53,25 +54,25 @@ always_comb begin
         7'b0100011: // S - Type
             begin
                 rs1_sel = 1'b1;
-                rs2_sel = 1'b1;
+                rs2_sel = 1'b0;
                 write_mem = 1'b1;
                 wb_sel = 2'b00; // no write bakc
                 reg_write = 1'b0;
-                rd = 5'bx; // rs2
+                rd = no_writeback_reg; // rs2
             end 
         7'b1100011: // B - Type
             begin
                 rs1_sel = 1'b0; // pc
-                rs2_sel = 1'b1; // immediate
+                rs2_sel = 1'b0; // immediate
                 write_mem = 1'b0;
                 wb_sel = 2'b00;
                 reg_write = 1'b0;
-                rd = 5'bx;
+                rd = no_writeback_reg;
             end 
         7'b1101111: // Jal
             begin
                 rs1_sel = 1'b0; // pc
-                rs2_sel = 1'b1; // imm
+                rs2_sel = 1'b0; // imm
                 write_mem = 1'b0;
                 wb_sel = 2'b00; // pcplus4
                 reg_write = 1'b1;
@@ -80,7 +81,7 @@ always_comb begin
         7'b1100111: // jalr
             begin
                 rs1_sel = 1'b1; // rs1
-                rs2_sel = 1'b1; // imm
+                rs2_sel = 1'b0; // imm
                 write_mem = 1'b0;
                 wb_sel = 2'b00; // pcplus4
                 reg_write = 1'b1;
@@ -89,7 +90,7 @@ always_comb begin
         7'b0110111: // lui
             begin
                 rs1_sel = 1'b0;  // no rs1 select
-                rs2_sel = 1'b0;  // no rs2 select
+                rs2_sel = 1'b1;  // no rs2 select
                 write_mem = 1'b0;
                 wb_sel = 2'b10; // sext(imm)
                 reg_write = 1'b1;
@@ -98,7 +99,7 @@ always_comb begin
         7'b0010111: // auipc
             begin
                 rs1_sel = 1'b0; // pc
-                rs2_sel = 1'b1; // imm
+                rs2_sel = 1'b0; // imm
                 write_mem = 1'b0;
                 wb_sel = 2'b11; //alu_out
                 reg_write = 1'b1;
@@ -111,7 +112,7 @@ always_comb begin
                 write_mem = 1'b0;
                 wb_sel = 2'bxx;
                 reg_write = 1'b0;
-                rd = 5'bx;
+                rd = no_writeback_reg;
             end
     endcase
 end
