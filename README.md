@@ -2,8 +2,7 @@
 A CPU built based on RISC-V architecture
 
 ## Some useful reference similar CPU projects github link:
-- This person is called [Nathalia](https://github.com/estufa-cin-ufpe/RISC-V-Pipeline/tree/master)? maybe..
-- This person is called .. idk [github link](https://github.com/yifax/RISC-V-PipeLine/tree/master)
+- Thanks to repos [Nathalia](https://github.com/estufa-cin-ufpe/RISC-V-Pipeline/tree/master) and [github link](https://github.com/yifax/RISC-V-PipeLine/tree/master) inspiration
 - [Risc-V Docs](https://msyksphinz-self.github.io/riscv-isadoc/)
 
 ## Assembler
