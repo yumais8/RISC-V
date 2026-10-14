@@ -115,6 +115,28 @@ def encode_i_alu(asm_line):
                 + '0010011')
 
 # ---------------------------------------------------------------------------
+# I-type jump encoder (jalr)
+# RISC-V spec: imm[11:0] | rs1 | funct3(000) | rd | opcode(1100111)
+# Library bug: jalr is routed through a label-based jump path and treats the
+# numeric immediate as a branch target label.
+# ---------------------------------------------------------------------------
+I_JUMP_UNSUPPORTED = {'jalr'}
+
+def encode_i_jump(asm_line):
+    """Correctly encode a JALR instruction into a 32-bit binary string."""
+    tokens = re.split(r'[\s,]+', asm_line.strip().lower())
+    op  = tokens[0]
+    rd  = REG_MAP[tokens[1]]
+    rs1 = REG_MAP[tokens[2]]
+    imm = int(tokens[3])
+
+    return (format(imm & 0xFFF, '012b')
+            + format(rs1, '05b')
+            + '000'
+            + format(rd, '05b')
+            + '1100111')
+
+# ---------------------------------------------------------------------------
 # I-type load encoder (lb, lh, lw, lbu, lhu)
 # RISC-V spec: imm[11:0] | rs1 | funct3 | rd | opcode(0000011)
 # Library limitation: only recognises lw; lb/lh/lbu/lhu are absent from its
@@ -280,7 +302,7 @@ I_LOAD_UNSUPPORTED = I_LOAD_FUNCT3.keys() - {'lw'}
 # without crashing — instruction count is preserved so the file length matches.
 _NOP = 'addi x0, x0, 0'
 
-with open('tb/test_hazards.s', 'r') as f:
+with open('tb/recursive_fibonacci.s', 'r') as f:
     assembly_lines = f.readlines()
 
 def _make_library_safe(lines):
@@ -291,7 +313,7 @@ def _make_library_safe(lines):
             safe.append(line)
             continue
         op = s.lower().split()[0]
-        safe.append((_NOP + '\n') if op in J_TYPE_OPS | U_TYPE_OPS | B_TYPE_OPS | I_LOAD_UNSUPPORTED | R_TYPE_UNSUPPORTED | I_ALU_UNSUPPORTED else line)
+        safe.append((_NOP + '\n') if op in J_TYPE_OPS | U_TYPE_OPS | B_TYPE_OPS | I_LOAD_UNSUPPORTED | R_TYPE_UNSUPPORTED | I_ALU_UNSUPPORTED | I_JUMP_UNSUPPORTED else line)
     return safe
 
 safe_code = ''.join(_make_library_safe(assembly_lines))
@@ -324,6 +346,8 @@ for bin_line, asm_line in zip(binary_lines, asm_instructions):
         fixed_lines.append(encode_r_type(asm_line))
     elif op in I_ALU_UNSUPPORTED:
         fixed_lines.append(encode_i_alu(asm_line))
+    elif op in I_JUMP_UNSUPPORTED:
+        fixed_lines.append(encode_i_jump(asm_line))
     elif op in I_LOAD_UNSUPPORTED:
         fixed_lines.append(encode_i_load(asm_line))
     elif op in S_TYPE_FUNCT3:

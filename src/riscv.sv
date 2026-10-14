@@ -1,15 +1,17 @@
-module datapath #(
-    INSTRUCTION_FILE = "",
-    MEMORY_FILE = ""
-)
-(
-    input  logic clk,
-    input  logic reset,
+module riscv (
+    input  logic        clk,
+    input  logic        reset,
 
-    // WB stage outputs (writeback to register file)
-    output logic [4:0]  rd_wb,
-    output logic [31:0] rd_data_wb,
-    output logic        reg_write_wb
+    // Instruction memory interface (read-only)
+    output logic [31:0] imem_addr,
+    input  logic [31:0] imem_rdata,
+
+    // Data memory interface
+    output logic [31:0] dmem_addr,
+    output logic [31:0] dmem_wdata,
+    output logic        dmem_write,
+    output logic [2:0]  dmem_funct3,
+    input  logic [31:0] dmem_rdata
 );
 
 logic [31:0] pc_mux_out;
@@ -31,12 +33,9 @@ pcAdder pc_adder(
     .next_pc(pcplus4)
 );
 
-orchestrationMemory #(
-    .FILE(INSTRUCTION_FILE)
-) pcInstructionMem (
-    .address(pc),
-    .instruction(instruction)
-);
+// Instruction memory is external; expose pc and consume fetched instruction
+assign imem_addr   = pc;
+assign instruction = imem_rdata;
 
 mux2 pc_mux(
     .data1(pcplus4),
@@ -245,8 +244,10 @@ pcAdder pc_adder_ex(
 localparam [6:0] jal_opcodes = 7'b1101111;
 localparam [6:0] jalr_opcodes = 7'b1100111;
 localparam [6:0] branch_opcodes = 7'b1100011;
-logic jumpImmediate = (opcodes_ex == jal_opcodes) || (opcodes_ex == jalr_opcodes);
-logic branchOpcodes = opcodes_ex == branch_opcodes;
+logic jumpImmediate;
+logic branchOpcodes;
+assign jumpImmediate = (opcodes_ex == jal_opcodes) || (opcodes_ex == jalr_opcodes);
+assign branchOpcodes = (opcodes_ex == branch_opcodes);
 
 assign pc_select = jumpImmediate | (branchOpcodes & comp_out);
 
@@ -265,7 +266,7 @@ logic pc_select_mem;
 
 EXMEM exmem_stage(
     .clk(clk),
-    .reset(reset || stall),  // when forwarding wants to stall, it means EXMEM needs to insert 1 no ops for the next cycle 
+    .reset(reset || stall),  // when forwarding wants to stall, it means EXMEM needs to insert 1 no ops for the next cycle
     .pcplus4_ex(pc_plus4_ex),
     .funct3_ex(funct3_ex),
     .write_mem_ex(write_mem_ex),
@@ -290,36 +291,24 @@ EXMEM exmem_stage(
     .pc_select_mem(pc_select_mem)
 );
 
-// MEM stage
+// MEM stage - data memory is external
 logic [31:0] mem_data_out;
 
-memory #(
-    .MEMORY_FILE(MEMORY_FILE)
-) data_memory (
-    .address(alu_out_mem),
-    .write_data(rs2_out_mem),
-    .write_mem(write_mem_mem),
-    .funct3(funct3_mem),
-    .clk(clk),
-    .reset(reset),
-    .mem_out(mem_data_out),
-    .memory0(),
-    .memory1(),
-    .memory2(),
-    .memory3(),
-    .memory4(),
-    .memory5(),
-    .memory6(),
-    .memory7(),
-    .memory8(),
-    .memory9()
-);
+assign dmem_addr    = alu_out_mem;
+assign dmem_wdata   = rs2_out_mem;
+assign dmem_write   = write_mem_mem;
+assign dmem_funct3  = funct3_mem;
+assign mem_data_out = dmem_rdata;
 
 logic [31:0] pcplus4_wb;
 logic [1:0] wb_select_wb;
 logic [31:0] mem_data_wb;
 logic [31:0] alu_data_wb;
 logic [31:0] sext_out_wb;
+
+logic [4:0]  rd_wb;
+logic [31:0] rd_data_wb;
+logic        reg_write_wb;
 
 // MEM WB stage
 MEMWB memwb_stage(

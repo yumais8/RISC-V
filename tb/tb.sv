@@ -4,21 +4,13 @@ module tb;
     logic clk;
     logic reset;
 
-    // WB stage outputs
-    logic [4:0]  rd_wb;
-    logic [31:0] rd_data_wb;
-    logic        reg_write_wb;
-
     // Instantiate unit under test
-    datapath #(
+    riscv_soc #(
         .INSTRUCTION_FILE("src/instruction/instruction_mem.txt"),
         .MEMORY_FILE("src/memory/data.txt")
     ) dut (
         .clk(clk),
-        .reset(reset),
-        .rd_wb(rd_wb),
-        .rd_data_wb(rd_data_wb),
-        .reg_write_wb(reg_write_wb)
+        .reset(reset)
     );
 
     // Clock generation (100MHz)
@@ -41,11 +33,10 @@ module tb;
         reset = 0;
         $display("Reset released at time %0t", $time);
 
-        repeat (70) begin
+        repeat (3000) begin
             @(posedge clk);
             #1;
-            $display("t=%0t  rd_wb=%0d  rd_data_wb=%0d  reg_write_wb=%b",
-                     $time, rd_wb, rd_data_wb, reg_write_wb);
+            $display("t=%0t", $time);
         end
 
         $display("Testbench completed");

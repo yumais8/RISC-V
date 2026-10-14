@@ -8,7 +8,8 @@
             "args": [
                 "--cc",
                 "tb/tb.sv",
-                "src/datapath.sv",
+                "src/riscv.sv",
+                "src/riscv_soc.sv",
                 "src/pc.sv",
                 "src/orchestrationMemory.sv",
                 "src/mux2.sv",
