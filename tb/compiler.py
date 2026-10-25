@@ -4,6 +4,9 @@ from riscv_assembler.convert import AssemblyConverter
 
 cnv = AssemblyConverter(output_mode='f')
 
+INPUT_FILE="tb/recursive_fibonacci.s"
+OUTPUT_FILE='src/instruction/instruction_mem.txt'
+
 # ---------------------------------------------------------------------------
 # Library audit: test each instruction type for correct 32-bit encoding.
 #
@@ -302,8 +305,9 @@ I_LOAD_UNSUPPORTED = I_LOAD_FUNCT3.keys() - {'lw'}
 # without crashing — instruction count is preserved so the file length matches.
 _NOP = 'addi x0, x0, 0'
 
-with open('tb/recursive_fibonacci.s', 'r') as f:
-    assembly_lines = f.readlines()
+with open(INPUT_FILE, 'r') as f:
+    # Drop directives (.text, .global): they emit no code but would shift line pairing and labels.
+    assembly_lines = [l for l in f if not (l.strip().startswith('.') and not l.strip().endswith(':'))]
 
 def _make_library_safe(lines):
     safe = []
@@ -319,7 +323,7 @@ def _make_library_safe(lines):
 safe_code = ''.join(_make_library_safe(assembly_lines))
 
 os.makedirs('src/instruction', exist_ok=True)
-cnv(safe_code, 'src/instruction/instruction_mem.txt')
+cnv(safe_code, OUTPUT_FILE)
 
 # Filter assembly source to actual instruction lines (skip blanks, comments,
 # and label-only lines).
@@ -329,8 +333,10 @@ asm_instructions = [
 ]
 
 # Read the 32-bit binary lines produced by riscv_assembler
-with open('src/instruction/instruction_mem.txt', 'r') as f:
+with open(OUTPUT_FILE, 'r') as f:
     binary_lines = [l.strip() for l in f if l.strip()]
+assert len(binary_lines) == len(asm_instructions), \
+    f"library emitted {len(binary_lines)} words for {len(asm_instructions)} instructions"
 
 # Pre-compute label positions for J-type offset resolution
 labels = resolve_labels(assembly_lines)
@@ -363,7 +369,7 @@ for bin_line, asm_line in zip(binary_lines, asm_instructions):
     pc += 4
 
 # Write byte-split output (four 8-bit lines per instruction)
-with open('src/instruction/instruction_mem.txt', 'w') as f:
+with open(OUTPUT_FILE, 'w') as f:
     for line in fixed_lines:
         for i in range(0, 32, 8):
             f.write(line[i:i+8] + '\n')

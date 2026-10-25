@@ -1,14 +1,13 @@
 # Recursive Fibonacci in RISC-V (RV32I)
 # No pseudoinstructions: call -> jal, ret -> jalr
-# Computes fib(20) = 6765
 
-    .text
-    .global _start
+.text
+.global _start
 
 _start:
-    addi    a0, x0, 5      # a0 = 20
+    addi    a0, x0, 7      # a0 = 5
     jal     ra, fib           # ra = return addr, jump to fib
-    # a0 now holds 6765
+
 halt:
     jal     x0, halt        # stop here forever
 
@@ -20,8 +19,8 @@ halt:
 # --------------------------------------------------
 fib:
     # Prologue
-    addi    sp, sp, -16
-    sw      ra, 12(sp)
+    addi    sp, sp, -16     # ff010113  The first execution from the very beginning up to here are all correct. There has to be something wrong with the later stack push and etc.
+    sw      ra, 12(sp)      #
     sw      s0, 8(sp)
 
     # if n <= 1, return n   (ble a0,t0 → bge t0,a0 — ble is a pseudoinstruction)
